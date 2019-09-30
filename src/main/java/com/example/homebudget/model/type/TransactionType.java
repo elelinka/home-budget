@@ -6,6 +6,9 @@ public enum TransactionType {
 
     private String name;
 
+    TransactionType() {
+    }
+
     private TransactionType(String name) {
         this.name = name;
     }

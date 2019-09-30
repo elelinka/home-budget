@@ -9,6 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 public class TransactionDao {
 
@@ -22,7 +24,7 @@ public class TransactionDao {
         String query = "INSERT INTO transactions(type, description, amount, date) VALUES (?, ?, ?, ?)";
 
         PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setString(1, transaction.getType().getName());
+        preparedStatement.setString(1, String.valueOf(transaction.getType()));
         preparedStatement.setString(2, transaction.getDescription());
         preparedStatement.setBigDecimal(3, transaction.getAmount());
         preparedStatement.setString(4, transaction.getDate());
@@ -30,11 +32,12 @@ public class TransactionDao {
         preparedStatement.executeUpdate();
     }
 
-    public Transaction read(TransactionType type) throws SQLException {
+    public List<Transaction> read(TransactionType type) throws SQLException {
         String query = "SELECT * FROM transactions WHERE type = ?";
+        List<Transaction> transactions = new LinkedList<>();
 
         PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setString(1, type.getName());
+        preparedStatement.setString(1, String.valueOf(type));
 
         ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -52,28 +55,30 @@ public class TransactionDao {
             transaction.setAmount(amount);
             transaction.setDate(date);
 
-            return transaction;
+            transactions.add(transaction);
+
+            return transactions;
         }
         return null;
     }
 
-    public boolean update(long id, String description) throws SQLException {
+    public int update(long id, String description) throws SQLException {
         String query = "UPDATE transactions SET description = ? WHERE id = ?";
 
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setString(1, description);
         preparedStatement.setLong(2, id);
 
-        return preparedStatement.execute();
+        return preparedStatement.executeUpdate();
     }
 
-    public boolean delete(long id) throws SQLException {
-        String query = "DELETE transactions WHERE id = ?";
+    public int delete(long id) throws SQLException {
+        String query = "DELETE FROM transactions WHERE id = ?";
 
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setLong(1, id);
 
-        return preparedStatement.execute();
+        return preparedStatement.executeUpdate();
     }
 
     public void close() throws SQLException {
